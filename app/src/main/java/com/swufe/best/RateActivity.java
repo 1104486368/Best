@@ -188,6 +188,9 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+
+
+
     @Override
     public void run() {
         Log.i(TAG,"run:run()......");
