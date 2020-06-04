@@ -43,8 +43,79 @@
 
     <Button
         android:id="@+id/btn_won"
-        android:text="@string/btn_won_label"
-        android:onClick="openOne"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:onClick="Onclick"
+        android:text="@string/btn_won_label" />
+
+    <Button
+        android:id="@+id/button_opencfg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="openOne"
+        android:layout_marginTop="24dp"
+        android:text="@string/btn_opencfg_label"/>
 </LinearLayout>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
