@@ -47,7 +47,37 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         show = findViewById(R.id.showOut);
 
 
- 
+        //获取SP里保存的数据
+        //私有访问，文件名“myrate”
+        //打开的时候从文件读取汇率
+        SharedPreferences sharedPreferences = getSharedPreferences("myrate", Activity.MODE_PRIVATE); //MODE_PRIVATE访问权限
+        //新版高版本的sdk可以用SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        dollarRate = sharedPreferences.getFloat("dollar_rate", 0.0f);  //第二个参数用默认值
+        euroRate = sharedPreferences.getFloat("euro_rate", 0.0f);
+        wonRate = sharedPreferences.getFloat("won_rate", 0.0f);
+
+        Log.i(TAG, "onCreate:sp dollarRate=" + dollarRate);
+        Log.i(TAG, "onCreate:sp euroRate=" + euroRate);
+        Log.i(TAG, "onCreate:sp wonRate=" + wonRate);
+
+
+        //开启子线程，用于获取真实网络汇率数据，不允许时间开销过多的响应，因此多线程，不影响主线程
+        Thread t = new Thread(this);  //一定要加上当前对象，去寻找Run方法，t就代表当前线程
+        t.start();
+
+        //两个线程之间的数据交换可以用handler方法，handler从msg消息队列去取
+        handler = new Handler(){
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                if(msg.what==5){
+                    String str = (String) msg.obj;
+                    Log.i(TAG,"handleMessage:getMessage msg = "+ str);
+                    show.setText(str);
+                }
+                super.handleMessage(msg);
+            }
+        };
+
     }
 
 
