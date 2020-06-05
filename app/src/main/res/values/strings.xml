@@ -18,4 +18,5 @@
     <string name="btn_save_label">Save</string>
     <string name="menu_set_label">setting</string>
     <string name="todayStr">setting</string>
+    <string name="label_open_list">OpenList</string>
 </resources>

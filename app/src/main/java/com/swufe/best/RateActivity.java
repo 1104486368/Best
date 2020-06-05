@@ -81,7 +81,7 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         Log.i(TAG, "onCreate: sp updateDate=" + updateDate);
         Log.i(TAG, "onCreate: todayStr=" + todayStr);
 
-//判断时间
+        //判断时间
         if(!todayStr.equals(updateDate)){
             Log.i(TAG, "onCreate: 需要更新");
             //开启子线程
@@ -102,19 +102,24 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         editor.putString("update_date",todayStr);
         editor.apply();
 
+        
 
-        //开启子线程，用于获取真实网络汇率数据，不允许时间开销过多的响应，因此多线程，不影响主线程
-        Thread t = new Thread(this);  //一定要加上当前对象，去寻找Run方法，t就代表当前线程
-        t.start();
+
 
         //两个线程之间的数据交换可以用handler方法，handler从msg消息队列去取
         handler = new Handler(){
             @Override
-            public void handleMessage(@NonNull Message msg) {
+            public void handleMessage(Message msg) {
                 if(msg.what==5){
-                    String str = (String) msg.obj;
-                    Log.i(TAG,"handleMessage:getMessage msg = "+ str);
-                    show.setText(str);
+                    Bundle bdl = (Bundle) msg.obj;
+                    dollarRate = bdl.getFloat("dollar-rate");
+                    euroRate = bdl.getFloat("euro-rate");
+                    wonRate = bdl.getFloat("won-rate");
+
+                    Log.i(TAG, "handleMessage: dollarRate:" + dollarRate);
+                    Log.i(TAG, "handleMessage: euroRate:" + euroRate);
+                    Log.i(TAG, "handleMessage: wonRate:" + wonRate);
+                    Toast.makeText(RateActivity.this, "汇率已更新", Toast.LENGTH_SHORT).show();
                 }
                 super.handleMessage(msg);
             }
@@ -184,18 +189,13 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if(item.getItemId()==R.id.menu_set){
-            Intent config = new Intent(this,ConfigActivity.class);
-            config.putExtra("dollar_rate_key",dollarRate);
-            config.putExtra("euro_rate_key",euroRate);
-            config.putExtra("won_rate_key",wonRate);
 
-            Log.i(TAG,"openOne:dollarRate=" + dollarRate);
-            Log.i(TAG,"openOne:euroRate=" + euroRate);
-            Log.i(TAG,"openOne:wonRate=" + wonRate);
+            openConfig();
 
-            //startActivity(config);
-            startActivityForResult(config,1);
-
+       }else if(item.getItemId()==R.id.open_list);{
+           //打开列表窗口
+            Intent list= new Intent(this,RateListActivity.class);
+            startActivity(list);
         }
 
         return super.onOptionsItemSelected(item);
@@ -311,32 +311,9 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         handler.sendMessage(msg);
 
 
-        handler = new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                if(msg.what==5){
-                    Bundle bdl = (Bundle) msg.obj;
-                    dollarRate = bdl.getFloat("dollar-rate");
-                    euroRate = bdl.getFloat("euro-rate");
-                    wonRate = bdl.getFloat("won-rate");
-
-                    Log.i(TAG, "handleMessage: dollarRate:" + dollarRate);
-                    Log.i(TAG, "handleMessage: euroRate:" + euroRate);
-                    Log.i(TAG, "handleMessage: wonRate:" + wonRate);
-                    Toast.makeText(RateActivity.this, "汇率已更新", Toast.LENGTH_SHORT).show();
-                }
-                super.handleMessage(msg);
-            }
-        };
 
 
-        //保存更新的日期
-        SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putFloat("dollar_rate",dollarRate);
-        editor.putFloat("euro_rate",euroRate);
-        editor.putFloat("won_rate",wonRate);
-        editor.apply();
+
 
     }
 
@@ -356,6 +333,7 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         return out.toString();
 
     }
+
 }
 
 
