@@ -19,6 +19,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -221,18 +226,80 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
             InputStream in = http.getInputStream();
 
             String html = inputStream2String(in);
-            Log.i(TAG,"run:html="+html);
+            Log.i(TAG, "run: html=" + html);
+            Document doc = Jsoup.parse(html);
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-
         }
 
+        Bundle bundle = new Bundle();
+        Document doc = null;
+        try {
+            url = new URL("http://www.usd-cny.com/icbc.htm");
+            doc = Jsoup.connect(String.valueOf(url)).get();
+            Log.i(TAG, "run: " + doc.title());
+            Elements tables = doc.getElementsByTag("table");
+
+            Element table6 = tables.get(5);
+            //Log.i(TAG, "run: table6=" + table6);
+            //获取TD中的数据
+            Elements tds = table6.getElementsByTag("td");
+            for(int i=0;i<tds.size();i+=8){
+                Element td1 = tds.get(i);
+                Element td2 = tds.get(i+5);
+
+                String str1 = td1.text();
+                String val = td2.text();
+
+                Log.i(TAG, "run: " + str1 + "==>" + val);
+
+                float v = 100f / Float.parseFloat(val);
+                if("美元".equals(str1)){
+                    bundle.putFloat("dollar-rate", v);
+                }else if("欧元".equals(str1)){
+                    bundle.putFloat("euro-rate", v);
+                }else if("韩国元".equals(str1)){
+                    bundle.putFloat("won-rate", v);
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Message msg = handler.obtainMessage(5);
+        msg.obj = bundle;
+        handler.sendMessage(msg);
 
 
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                if(msg.what==5){
+                    Bundle bdl = (Bundle) msg.obj;
+                    dollarRate = bdl.getFloat("dollar-rate");
+                    euroRate = bdl.getFloat("euro-rate");
+                    wonRate = bdl.getFloat("won-rate");
 
+                    Log.i(TAG, "handleMessage: dollarRate:" + dollarRate);
+                    Log.i(TAG, "handleMessage: euroRate:" + euroRate);
+                    Log.i(TAG, "handleMessage: wonRate:" + wonRate);
+                    Toast.makeText(RateActivity.this, "汇率已更新", Toast.LENGTH_SHORT).show();
+                }
+                super.handleMessage(msg);
+            }
+        };
+
+
+        //保存更新的日期
+        SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putFloat("dollar_rate",dollarRate);
+        editor.putFloat("euro_rate",euroRate);
+        editor.putFloat("won_rate",wonRate);
+        editor.apply();
 
     }
 
@@ -250,7 +317,6 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
             out.append(buffer,0,rsz);
         }
         return out.toString();
-
 
     }
 }
