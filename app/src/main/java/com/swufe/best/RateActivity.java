@@ -31,6 +31,9 @@ import java.io.Reader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class RateActivity extends AppCompatActivity implements Runnable {   //Runnable一个接口，指定一个Run方法
 
@@ -38,6 +41,7 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
     private float dollarRate = 0.1f;
     private float euroRate = 0.2f;
     private float wonRate = 0.3f;
+    private String updataData = "";
 
     EditText rmb;
     TextView show;
@@ -60,10 +64,43 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         dollarRate = sharedPreferences.getFloat("dollar_rate", 0.0f);  //第二个参数用默认值
         euroRate = sharedPreferences.getFloat("euro_rate", 0.0f);
         wonRate = sharedPreferences.getFloat("won_rate", 0.0f);
+        updataData = sharedPreferences.getString("updata_data","");
+
+        String updateDate = sharedPreferences.getString("update_date","");
+
+        //获取当前系统时间
+        Date today = Calendar.getInstance().getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        final String todayStr = sdf.format(today);
 
         Log.i(TAG, "onCreate:sp dollarRate=" + dollarRate);
         Log.i(TAG, "onCreate:sp euroRate=" + euroRate);
         Log.i(TAG, "onCreate:sp wonRate=" + wonRate);
+
+
+        Log.i(TAG, "onCreate: sp updateDate=" + updateDate);
+        Log.i(TAG, "onCreate: todayStr=" + todayStr);
+
+//判断时间
+        if(!todayStr.equals(updateDate)){
+            Log.i(TAG, "onCreate: 需要更新");
+            //开启子线程
+            Thread t = new Thread(this);
+            t.start();
+        }else{
+            Log.i(TAG, "onCreate: 不需要更新");
+        }
+
+
+
+        //保存更新的日期
+        SharedPreferences sp = getSharedPreferences("myrate", Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putFloat("dollar_rate",dollarRate);
+        editor.putFloat("euro_rate",euroRate);
+        editor.putFloat("won_rate",wonRate);
+        editor.putString("update_date",todayStr);
+        editor.apply();
 
 
         //开启子线程，用于获取真实网络汇率数据，不允许时间开销过多的响应，因此多线程，不影响主线程

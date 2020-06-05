@@ -1,15 +1,18 @@
 package com.swufe.best;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class SecondActivity extends AppCompatActivity {
     TextView score;
     TextView score2;
+
+
+    
 
 
     @Override
