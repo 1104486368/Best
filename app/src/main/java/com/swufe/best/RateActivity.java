@@ -102,7 +102,7 @@ public class RateActivity extends AppCompatActivity implements Runnable {   //Ru
         editor.putString("update_date",todayStr);
         editor.apply();
 
-        
+
 
 
 
